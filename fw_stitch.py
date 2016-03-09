@@ -63,9 +63,7 @@ def read_block(infile, crc_func, verbose=False):
 
         (block_crc,) = struct.unpack('>I', rec)
 
-        crc_block2 = ''.join(crc_block)
-
-        crc = crc_func(crc_block2)
+        crc = crc_func(''.join(crc_block))
 
         block_number = ((seq >> 16) & 0xff00) | ((seq >> 8) & 0xff)
         block_number &= 0x1fff
@@ -110,14 +108,14 @@ def _main(argv):
 
                 blocks[block_number] = block_data
 
-        for i in range(len(blocks)):
-            if i > max_block:
+        for index, block in enumerate(blocks):
+            if index > max_block:
                 break
-            if len(blocks[i]) == 0:
-                print "Missing block: %u" % i
+            if len(block) == 0:
+                print "Missing block: %u" % index
                 break
             else:
-                outfile.write(blocks[i])
+                outfile.write(block)
 
 if __name__ == "__main__":
     _main(sys.argv)
