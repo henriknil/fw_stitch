@@ -4,6 +4,7 @@
 
 import argparse
 import crcmod
+import logging
 import struct
 import sys
 
@@ -26,8 +27,7 @@ def read_block(infile, crc_func, verbose=False):
 
         (val,) = struct.unpack('>I', rec)
 
-        if verbose:
-            print "val: %08X" % val
+        logging.debug("val: %08X", val)
 
         rec = infile.read(4)
         if len(rec) != 4:
@@ -39,9 +39,8 @@ def read_block(infile, crc_func, verbose=False):
         blocklen = (val >> 8) & 0xfff
         table = seq >> 24
 
-        if verbose:
-            print "seq: %08X, blocklen: %u, table: %08X" % (
-                seq, blocklen, table)
+        logging.debug("seq: %08X, blocklen: %u, table: %08X",
+                      seq, blocklen, table)
 
         rec = infile.read(14)
         if len(rec) != 14:
@@ -63,20 +62,18 @@ def read_block(infile, crc_func, verbose=False):
 
         (block_crc,) = struct.unpack('>I', rec)
 
-        crc = crc_func(''.join(crc_block))
+        crc = crc_func(b''.join(crc_block))
 
         block_number = ((seq >> 16) & 0xff00) | ((seq >> 8) & 0xff)
         block_number &= 0x1fff
 
-        if verbose:
-            print "block_crc: %08X, block_number:%u, crc:%08x" % (
-                block_crc, block_number, crc)
+        logging.debug("block_crc: %08X, block_number:%u, crc:%08X",
+                      block_crc, block_number, crc)
 
         yield block_number, block_data, crc
 
 
 def _main(argv):
-
     parser = argparse.ArgumentParser(argv)
     parser.add_argument("-v", "--verbose",
                         help="increase output verbosity",
@@ -88,6 +85,9 @@ def _main(argv):
                         help="file to write",
                         required=True)
     args = parser.parse_args()
+
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     with open(args.infile, mode='rb') as infile, open(
         args.outfile, mode='wb') as outfile:
