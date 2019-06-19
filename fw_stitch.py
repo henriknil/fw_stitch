@@ -87,13 +87,13 @@ def _main(argv):
         logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     with open(args.infile, mode='rb') as infile, open(
-        args.outfile, mode='wb') as outfile:
+            args.outfile, mode='wb') as outfile:
 
         dvb_crc32 = crcmod.mkCrcFun(0x104c11db7,
                                     rev=False,
                                     initCrc=0xFFFFFFFF,
                                     xorOut=0)
-        blocks = [bytearray() for i in range(8192)]
+        blocks = [None] * 8192
         max_block = 0
 
         for block_number, block_data, crc in (
