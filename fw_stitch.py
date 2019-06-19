@@ -2,16 +2,13 @@
 """Parses a DVB stream dump and creates a binary FW file.
 """
 
+from __future__ import print_function
+
 import argparse
 import crcmod
 import logging
 import struct
 import sys
-
-# sudo apt-get install gcc python-dev python-setuptools
-# sudo easy_install -U pip
-# sudo pip uninstall crcmod
-# sudo pip install -U crcmod
 
 
 def read_block(infile, crc_func, verbose=False):
@@ -111,11 +108,12 @@ def _main(argv):
         for index, block in enumerate(blocks):
             if index > max_block:
                 break
-            if len(block) == 0:
-                print "Missing block: %u" % index
+            if not block:
+                print("Missing block: {}".format(index), file=sys.stderr)
                 break
             else:
                 outfile.write(block)
+
 
 if __name__ == "__main__":
     _main(sys.argv)
